@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Dashboard Jaringan</title>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #f1f5f9;
+      color: #333;
+    }
+
+    .sidebar {
+      position: fixed;
+      top: 0; left: 0;
+      width: 220px;
+      height: 100vh;
+      background: #1e3a8a;
+      color: white;
+      padding: 20px;
+    }
+
+    .sidebar h2 {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+
+    .sidebar a {
+      display: block;
+      color: white;
+      text-decoration: none;
+      margin: 15px 0;
+      font-size: 1rem;
+    }
+
+    .sidebar a:hover {
+      text-decoration: underline;
+    }
+
+    .main {
+      margin-left: 240px;
+      padding: 30px;
+    }
+
+    .dashboard-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .dashboard-header h1 {
+      font-size: 1.8rem;
+    }
+
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 20px;
+      margin-top: 30px;
+    }
+
+    .card {
+      background: white;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .card i {
+      font-size: 2rem;
+      color: #1e40af;
+    }
+
+    .card .info {
+      text-align: right;
+    }
+
+    .card .info h3 {
+      margin: 0;
+      font-size: 1.4rem;
+    }
+
+    .card .info p {
+      margin: 4px 0 0;
+      font-size: 0.9rem;
+      color: #666;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="sidebar">
+    <h2>NetMonitor</h2>
+    <a href="#"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
+    <a href="#"><i class="fas fa-network-wired"></i> Interface</a>
+    <a href="#"><i class="fas fa-hdd"></i> Disk</a>
+    <a href="#"><i class="fas fa-microchip"></i> CPU</a>
+    <a href="#"><i class="fas fa-clock"></i> Uptime</a>
+    <a href="#"><i class="fas fa-plug"></i> Netwatch</a>
+  </div>
+
+  <div class="main">
+    <div class="dashboard-header">
+      <h1>Monitoring Jaringan</h1>
+      <p>Versi: 1.0 | Admin: Irfan</p>
+    </div>
+
+    <div class="cards">
+      <div class="card">
+        <i class="fas fa-microchip"></i>
+        <div class="info">
+          <h3>24%</h3>
+          <p>CPU Usage</p>
+        </div>
+      </div>
+      <div class="card">
+        <i class="fas fa-memory"></i>
+        <div class="info">
+          <h3>1.2 GB</h3>
+          <p>RAM Used</p>
+        </div>
+      </div>
+      <div class="card">
+        <i class="fas fa-hdd"></i>
+        <div class="info">
+          <h3>40%</h3>
+          <p>Disk Usage</p>
+        </div>
+      </div>
+      <div class="card">
+        <i class="fas fa-clock"></i>
+        <div class="info">
+          <h3>5d 04:23</h3>
+          <p>Uptime</p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <h2 style="margin-top:40px;">Interface Status</h2>
+<table border="1" cellpadding="10" cellspacing="0" style="width:100%; background:white; border-collapse: collapse;">
+  <thead style="background:#1e3a8a; color:white;">
+    <tr>
+      <th>Nama</th>
+      <th>Tipe</th>
+      <th>Status</th>
+    </tr>
+  </thead>
+  <tbody id="interface-table">
+    <tr><td colspan="3">Loading...</td></tr>
+  </tbody>
+</table>
+
+<h2 style="margin-top:40px;">Traffic Interface: <span id="iface-name">ether1</span></h2>
+<p>Rx: <span id="rx">--</span> Kbps | Tx: <span id="tx">--</span> Kbps</p>
+
+<h2 style="margin-top:40px;">Netwatch Monitoring</h2>
+<table border="1" cellpadding="10" cellspacing="0" style="width:100%; background:white; border-collapse: collapse;">
+  <thead style="background:#1e3a8a; color:white;">
+    <tr>
+      <th>Host</th>
+      <th>Status</th>
+      <th>Sejak</th>
+    </tr>
+  </thead>
+  <tbody id="netwatch-table">
+    <tr><td colspan="3">Loading...</td></tr>
+  </tbody>
+</table>
+<script>
+  async function loadStatus() {
+    const res = await fetch("http://localhost:5000/api/status");
+    const data = await res.json();
+    document.getElementById("cpu").innerText = data.cpu + " %";
+    document.getElementById("uptime").innerText = data.uptime;
+    document.getElementById("ram").innerText = (data.total_memory - data.free_memory) + " MB";
+    document.getElementById("disk").innerText = (data.disk_total - data.disk_free) + " MB";
+  }
+
+  async function loadInterfaces() {
+    const res = await fetch("http://localhost:5000/api/interface");
+    const data = await res.json();
+    const tbody = document.getElementById("interface-table");
+    tbody.innerHTML = "";
+    data.forEach((iface) => {
+      tbody.innerHTML += `
+        <tr>
+          <td>${iface.name}</td>
+          <td>${iface.type}</td>
+          <td style="color:${iface.running === 'true' ? 'green' : 'red'}">
+            ${iface.running === 'true' ? 'Aktif' : 'Mati'}
+          </td>
+        </tr>
+      `;
+    });
+  }
+
+  async function loadTraffic(interfaceName = "ether1") {
+    document.getElementById("iface-name").innerText = interfaceName;
+    const res = await fetch(`http://localhost:5000/api/traffic/${interfaceName}`);
+    const data = await res.json();
+    document.getElementById("rx").innerText = data.rx;
+    document.getElementById("tx").innerText = data.tx;
+  }
+
+  async function loadNetwatch() {
+    const res = await fetch("http://localhost:5000/api/netwatch");
+    const data = await res.json();
+    const tbody = document.getElementById("netwatch-table");
+    tbody.innerHTML = "";
+    data.forEach((host) => {
+      tbody.innerHTML += `
+        <tr>
+          <td>${host.host}</td>
+          <td style="color:${host.status === 'up' ? 'green' : 'red'}">
+            ${host.status.toUpperCase()}
+          </td>
+          <td>${host.since}</td>
+        </tr>
+      `;
+    });
+  }
+
+  function refreshAll() {
+    loadStatus();
+    loadInterfaces();
+    loadTraffic("ether1");
+    loadNetwatch();
+  }
+
+  refreshAll();
+  setInterval(refreshAll, 5000);
+</script>
+
+
+</body>
+</html>
+<script>
+  async function loadStatus() {
+    const res = await fetch("http://localhost:5000/api/status");
+    const data = await res.json();
+
+    document.getElementById("cpu").innerText = data.cpu + "%";
+    document.getElementById("uptime").innerText = data.uptime;
+    document.getElementById("ram").innerText = data.total_memory - data.free_memory + " MB";
+    document.getElementById("disk").innerText = data.disk_total - data.disk_free + " MB";
+  }
+
+  loadStatus();
+  setInterval(loadStatus, 5000); // refresh setiap 5 detik
+</script>
+<script>
+  async function loadStatus() {
+    try {
+      const res = await fetch("http://localhost:5000/api/status");
+      const data = await res.json();
+
+      document.getElementById("cpu").innerText = data.cpu + " %";
+      document.getElementById("uptime").innerText = data.uptime;
+      document.getElementById("ram").innerText = (data.total_memory - data.free_memory) + " MB";
+      document.getElementById("disk").innerText = (data.disk_total - data.disk_free) + " MB";
+    } catch (err) {
+      console.error("Gagal ambil data:", err);
+    }
+  }
+
+  // Panggil pertama kali dan setiap 5 detik
+  loadStatus();
+  setInterval(loadStatus, 5000);
+</script>
