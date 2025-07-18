@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Signage PulNet</title>
+  <style>
+    body {
+      margin: 0;
+      background: #000;
+      color: #fff;
+      font-family: 'Segoe UI', sans-serif;
+      overflow: hidden;
+    }
+
+    .header {
+      text-align: center;
+      padding: 20px;
+      font-size: 2em;
+    }
+
+    .running-text {
+      position: absolute;
+      bottom: 0;
+      width: 100%;
+      white-space: nowrap;
+      overflow: hidden;
+      box-sizing: border-box;
+      background: #222;
+      padding: 10px 0;
+    }
+
+    .running-text span {
+      display: inline-block;
+      padding-left: 100%;
+      animation: scroll-left 20s linear infinite;
+    }
+
+    @keyframes scroll-left {
+      0% {
+        transform: translateX(0%);
+      }
+      100% {
+        transform: translateX(-100%);
+      }
+    }
+
+    .datetime {
+      text-align: center;
+      font-size: 1.5em;
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="header">📺 Informasi PulNet</div>
+  <div class="datetime">
+    <div id="tanggal"></div>
+    <div id="jam"></div>
+  </div>
+
+  <div class="running-text">
+    <span>Selamat datang di layanan internet PulNet! Promo bulan ini: Diskon 20% untuk pelanggan baru! ⚡</span>
+  </div>
+
+  <script>
+    function updateDateTime() {
+      const now = new Date();
+      const optionsTanggal = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+      document.getElementById("tanggal").innerText = now.toLocaleDateString('id-ID', optionsTanggal);
+      document.getElementById("jam").innerText = now.toLocaleTimeString('id-ID');
+    }
+
+    setInterval(updateDateTime, 1000);
+    updateDateTime();
+  </script>
+
+</body>
+</html>
